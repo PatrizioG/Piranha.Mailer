@@ -15,7 +15,7 @@ namespace Piranha.Mailer
         {
             App.Modules.Register<Module>();
 
-            services.Configure<SmtpSettings>(smtpSettings);
+            services.Configure<SmtpSettings>(smtpSettings.GetSection("SmtpSettings"));
             services.AddSingleton<IMailer, Mailer>();
 
             return services;

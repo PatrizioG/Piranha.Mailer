@@ -21,32 +21,29 @@ namespace Piranha.Mailer
 
         public async Task SendEmailAsync(string email, string subject, string body)
         {
-            try
+
+            var message = new MimeMessage();
+            message.From.Add(new MailboxAddress(_smtpSettings.SenderName, _smtpSettings.SenderEmail));
+            message.To.Add(MailboxAddress.Parse(email));
+            message.Subject = subject;
+
+            message.Body = new TextPart(TextFormat.Html) { Text = body };
+
+            using (var smtp = new SmtpClient())
             {
-                var message = new MimeMessage();
-                message.From.Add(new MailboxAddress(_smtpSettings.SenderName, _smtpSettings.SenderEmail));
-                message.To.Add(MailboxAddress.Parse(email));
-                message.Subject = subject;
+                smtp.ServerCertificateValidationCallback = (s, c, h, e) => true;
 
-                message.Body = new TextPart(TextFormat.Html) { Text = body };
-
-                using(var smtp = new SmtpClient())
+                smtp.MessageSent += (sender, a) =>
                 {
-                    smtp.ServerCertificateValidationCallback = (s, c, h, e) => true;
+                };
 
-                    smtp.MessageSent += (sender, a) =>
-                    {
-                    };
+                SecureSocketOptions secureSocketOptions = SecureSocketOptions.Auto;
+                Enum.TryParse(_smtpSettings.SecureSocketOptions, out secureSocketOptions);
 
-                    await smtp.ConnectAsync(_smtpSettings.Server, _smtpSettings.Port, SecureSocketOptions.StartTls);
-                    await smtp.AuthenticateAsync(_smtpSettings.Username, _smtpSettings.Password);
-                    await smtp.SendAsync(message);
-                    await smtp.DisconnectAsync(true);
-                }
-            }
-            catch (Exception e)
-            {
-                throw new InvalidOperationException(e.Message);
+                await smtp.ConnectAsync(_smtpSettings.Server, _smtpSettings.Port, secureSocketOptions);
+                await smtp.AuthenticateAsync(_smtpSettings.Username, _smtpSettings.Password);
+                await smtp.SendAsync(message);
+                await smtp.DisconnectAsync(true);
             }
         }
     }

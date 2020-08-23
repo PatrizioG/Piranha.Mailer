@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Piranha.Mailer.Models
+﻿namespace Piranha.Mailer.Models
 {
     public class SmtpSettings
     {
@@ -12,6 +8,6 @@ namespace Piranha.Mailer.Models
         public string SenderEmail { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
-
+        public string SecureSocketOptions { get; set; }
     }
 }
